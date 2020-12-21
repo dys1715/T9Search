@@ -69,22 +69,6 @@ public final class T9Utils {
         return ((c >= '0') && (c <= '9')) || (c == ',') || (c == '+') || (c == '*') || (c == '#');
     }
 
-    /**
-     * 检测输入是否是有效的T9键
-     *
-     * @param key 键
-     * @return <code>true</code> - 如果输入为有效的T9键，<code>false</code> - 其他
-     */
-    public static boolean isValidT9Key(@NonNull CharSequence key) {
-        final int LEN = key.length();
-        for (int i = 0; i < LEN; i++) {
-            if (!isValidT9Key(key.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     static int getWordsCount(String key, int start, int end) {
         int count = 0;
 
@@ -104,49 +88,15 @@ public final class T9Utils {
         return count;
     }
 
+    //把字符型数字转化成字母
     static char convertDigitToInitial(char c) {
+        //c='03'-->(char)(67+(51-35))=(char)83=S
+        //由此可见，字符数字2-9(键盘上代表字母的几个数字按键)可转化为字母R-Y，用以标记
         return (char) ('C' + (c - '#'));
     }
 
     static boolean isInitial(char c) {
         return (c >= 'C') && (c <= 'Y');
-    }
-
-    /**
-     * 转换T9索引为对应的T9字符
-     *
-     * @param index T9索引。0~9 -> 0~9, '+' -> 10, ',' -> 11, '*' -> 12, '#' -> 13.
-     * @return T9字符
-     * @throws ArrayIndexOutOfBoundsException <code>index < 0 || index > 13</code>
-     */
-    public static char convertIndexToT9Key(int index) {
-        return VALID_T9_KEYS[index];
-    }
-
-    /**
-     * 转换T9字符为对应的T9索引
-     *
-     * @param c T9字符 - '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', ',', '*', '#'.
-     * @return T9索引
-     * @throws IllegalArgumentException
-     */
-    public static int convertT9CharToIndex(char c) {
-        if ((c >= '0') && (c <= '9')) {
-            return c - '0';
-        }
-
-        switch (c) {
-            case '+':
-                return 10;
-            case ',':
-                return 11;
-            case '*':
-                return 12;
-            case '#':
-                return 13;
-            default:
-                throw new IllegalArgumentException("INVALID T9 SEARCH CHARACTER");
-        }
     }
 
     /**
@@ -157,120 +107,34 @@ public final class T9Utils {
      */
     public static char formatCharToT9(char c) {
         if (c >= 'A' && c <= 'Z') {
-            Log.e("formatCharToT9-AZ--", "" + PINYIN_T9_MAP[c - 'A']);
+            Log.e("formatCharToT9-AZ--", "char=" + PINYIN_T9_MAP[c - 'A']);
             return PINYIN_T9_MAP[c - 'A'];
         } else if (c >= 'a' && c <= 'z') {
-            Log.e("formatCharToT9-az--", "" + PINYIN_T9_MAP[c - 'a']);
+            Log.e("formatCharToT9-az--", "char=" + PINYIN_T9_MAP[c - 'a']);
             return PINYIN_T9_MAP[c - 'a'];
         } else if (isValidT9Key(c)) {
-            Log.e("formatCharToT9-valid--", "" + c);
+            Log.e("formatCharToT9-valid--", "char=" + c);
             return c;
         }
 
         return '\0';
     }
 
-    static String convertToT9Key(String input) {
-        StringBuilder sb = getReusableStringBuilder();
-        char cLast = ' ';
-        final int LEN = input.length();
-        for (int i = 0; i < LEN; i++) {
-            char cSrc = input.charAt(i);
-            char t9c = formatCharToT9(cSrc);
-
-            if (t9c == 0)
-                t9c = ' ';
-            else if (Character.isUpperCase(cSrc) || i == 0
-                    || (Character.isLetter(cSrc) && !Character.isLetter(cLast)))
-                t9c = convertDigitToInitial(t9c);
-            else if (Character.isDigit(cSrc) && !Character.isDigit(cLast))
-                t9c = convertDigitToInitial(t9c);
-            else if (isValidT9Key(cSrc))
-                t9c = convertDigitToInitial(t9c);
-
-            sb.append(t9c);
-            cLast = cSrc;
-        }
-
-        String result = sb.toString();
-        recycleStringBuilder(sb);
-        return result;
-    }
-
-    static String formatPinyin(String pinyin) {
-        StringBuilder pinyinBuilder = getReusableStringBuilder();
-        final int LEN = pinyin.length();
-        char c;
-        for (int i = 0; i < LEN; i++) {
-            c = pinyin.charAt(i);
-            if (i == 0) {
-                c = Character.toUpperCase(c);
-            } else {
-                c = Character.toLowerCase(c);
-            }
-            pinyinBuilder.append(c);
-        }
-
-        String format = pinyinBuilder.toString();
-        recycleStringBuilder(pinyinBuilder);
-        return format;
-    }
-
-    static String formatNonPinyin(String src) {
-        StringBuilder sb = getReusableStringBuilder();
-        final int LEN = src.length();
-        char c;
-        for (int i = 0; i < LEN; i++) {
-            c = src.charAt(i);
-            if (Character.isLetter(c)) {
-                c = Character.toUpperCase(c);
-            }
-            sb.append(c);
-        }
-
-        String format = sb.toString();
-        recycleStringBuilder(sb);
-        return format;
-    }
-
-    /**
-     * Build T9 Key.
-     *
-     * @param pinyinTokens Pinyin tokens.
-     * @return T9 Key.
-     * @see PinyinToken
-     * @deprecated use {@link #buildT9Key(String, PinyinProvider)}.
-     */
-    @NonNull
-    @Deprecated
-    public static String buildT9Key(@NonNull List<PinyinToken> pinyinTokens) {
-        StringBuilder pinyinBuilder = getReusableStringBuilder();
-
-        for (PinyinToken pinyinToken : pinyinTokens) {
-            if (PinyinToken.PINYIN == pinyinToken.type) {
-                pinyinBuilder.append(formatPinyin(pinyinToken.target));
-            } else {
-                pinyinBuilder.append(formatNonPinyin(pinyinToken.target));
-            }
-        }
-
-        String t9Key = convertToT9Key(pinyinBuilder.toString());
-        recycleStringBuilder(pinyinBuilder);
-        return t9Key;
-    }
-
     @NonNull
     private static String convertPinyinToT9Key(String py) {
-        if (py == null || py.length() == 0)
+        if (py == null || py.length() == 0) {
+            Log.e("convertPinyinToT9Key---", "t9Key=null");
             return " ";
+        }
 
         StringBuilder t9KeyBuilder = getReusableStringBuilder();
 
         for (int i = 0; i < py.length(); i++) {
             char c = py.charAt(i);
             if (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z')) {
-                char t9C = formatCharToT9(c);
+                char t9C = formatCharToT9(c); //c='D'-->t9C='3'-->
                 if (i == 0) {
+                    //convertDigitToInitial: return (char) ('C' + (c - '#'))-->67+(51-35)=83->S
                     t9C = convertDigitToInitial(t9C);
                 }
 
@@ -284,6 +148,7 @@ public final class T9Utils {
 
         String t9Key = t9KeyBuilder.toString();
         recycleStringBuilder(t9KeyBuilder);
+        Log.e("convertPinyinToT9Key---", "t9Key=" + t9Key);
         return t9Key;
     }
 
@@ -318,6 +183,7 @@ public final class T9Utils {
 
             if (/*ASCII*/c < 128 ||/*Extended Latin*/(c < 0x250 || (0x1e00 <= c && c < 0x1eff))) {
                 char t9c = convertDigitToInitial(formatCharToT9(c));
+                Log.e("buildT9Key---", "t9Key=" + t9c);
                 insertT9Key(t9KeyBuilder, String.valueOf(t9c));
             } else {
                 String[] pinyin = provider.getPinyin(c);
@@ -333,6 +199,7 @@ public final class T9Utils {
                     t9KeyBuilder.setLength(0);
                     for (String py : pinyin) {
                         tempBuilder.setLength(0);
+
                         tempBuilder.append(temp);
                         insertT9Key(tempBuilder, convertPinyinToT9Key(py));
                         t9KeyBuilder.append(tempBuilder);
@@ -345,6 +212,7 @@ public final class T9Utils {
         t9KeyBuilder.delete(t9KeyBuilder.length() - 1, t9KeyBuilder.length());
         String t9Key = t9KeyBuilder.toString();
         recycleStringBuilder(t9KeyBuilder);
+        Log.e("buildT9Key--return-", "t9Key=" + t9Key);
         return t9Key;
     }
 

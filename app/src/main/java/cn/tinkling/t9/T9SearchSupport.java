@@ -1,4 +1,4 @@
-package cn.tinkling.t9search.sample;
+package cn.tinkling.t9;
 
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -27,6 +27,7 @@ import cn.tinkling.t9.PinyinProvider;
 import cn.tinkling.t9.T9MatchInfo;
 import cn.tinkling.t9.T9Matcher;
 import cn.tinkling.t9.T9Utils;
+import cn.tinkling.t9search.sample.Contact;
 
 public final class T9SearchSupport {
 

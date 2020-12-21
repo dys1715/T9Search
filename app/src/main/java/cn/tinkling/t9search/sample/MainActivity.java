@@ -30,6 +30,8 @@ import com.nabinbhandari.android.permissions.Permissions;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.tinkling.t9.T9SearchSupport;
+
 public class MainActivity extends AppCompatActivity {
 
     static List<Contact> mContactsAll;
