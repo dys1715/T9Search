@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkPermission();
-
         mContactsAdapter = new ContactsAdapter();
         mT9Filter = new T9Filter();
 
@@ -70,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setMessage("Loading...");
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);
+
+        checkPermission();
     }
 
     private void checkPermission() {

@@ -1,6 +1,10 @@
 package cn.tinkling.t9;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
+
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -153,10 +157,13 @@ public final class T9Utils {
      */
     public static char formatCharToT9(char c) {
         if (c >= 'A' && c <= 'Z') {
+            Log.e("formatCharToT9-AZ--", "" + PINYIN_T9_MAP[c - 'A']);
             return PINYIN_T9_MAP[c - 'A'];
         } else if (c >= 'a' && c <= 'z') {
+            Log.e("formatCharToT9-az--", "" + PINYIN_T9_MAP[c - 'a']);
             return PINYIN_T9_MAP[c - 'a'];
         } else if (isValidT9Key(c)) {
+            Log.e("formatCharToT9-valid--", "" + c);
             return c;
         }
 
@@ -305,6 +312,7 @@ public final class T9Utils {
         t9KeyBuilder.append(T9_KEYS_DIVIDER);
 
         final int len = src.length();
+        Log.e("buildT9Key---", "src=" + src + ", len=" + len);
         for (int i = 0; i < len; ++i) {
             char c = src.charAt(i);
 
@@ -313,6 +321,7 @@ public final class T9Utils {
                 insertT9Key(t9KeyBuilder, String.valueOf(t9c));
             } else {
                 String[] pinyin = provider.getPinyin(c);
+                Log.e("buildT9Key---", "pinyins=" + Arrays.toString(pinyin));
                 if (pinyin == null || pinyin.length == 0) {
                     insertT9Key(t9KeyBuilder, " ");
                 } else if (pinyin.length == 1) {
